@@ -136,8 +136,6 @@ package vvc_methods_pkg is
   procedure avalon_st_receive(
     signal VVCT                 : inout t_vvc_target_record;
     constant vvc_instance_idx   : in    integer;
-    variable data_array         : inout t_slv_array;
-    variable empty              : inout std_logic_vector;
     constant msg                : in    string
   );
 
@@ -183,8 +181,6 @@ package body vvc_methods_pkg is
   procedure avalon_st_receive(
     signal VVCT                 : inout t_vvc_target_record;
     constant vvc_instance_idx   : in    integer;
-    variable data_array         : inout t_slv_array;
-    variable empty              : inout std_logic_vector;
     constant msg                : in    string
   ) is
     constant proc_name : string := get_procedure_name_from_instance_name(vvc_instance_idx'instance_name);
@@ -193,7 +189,7 @@ package body vvc_methods_pkg is
     -- Create command by setting common global 'VVCT' signal record and dedicated VVC 'shared_vvc_cmd' record
     -- locking semaphore in set_general_target_and_command_fields to gain exclusive right to VVCT and shared_vvc_cmd
     -- semaphore gets unlocked in await_cmd_from_sequencer of the targeted VVC
-    set_general_target_and_command_fields(VVCT, vvc_instance_idx, RX, proc_call, msg, QUEUED, SEND);
+    set_general_target_and_command_fields(VVCT, vvc_instance_idx, RX, proc_call, msg, QUEUED, RECEIVE);
 
     -- Send command record
     send_command_to_vvc(VVCT);

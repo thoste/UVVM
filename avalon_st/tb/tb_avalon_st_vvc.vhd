@@ -38,11 +38,25 @@ architecture func of tb_avalon_st_vvc is
    -- Clock and bit period settings
    constant C_CLK_PERIOD         : time := 10 ns;
    constant C_BIT_PERIOD         : time := 16 * C_CLK_PERIOD;
+
+   -- Avalon-ST bus widths
+   --constant C_CHANNEL_WIDTH   : natural := 1;
+   constant C_DATA_WIDTH      : natural := 20;
+   constant C_DATA_LENGTH     : natural := 10;
+   --constant C_ERROR_WIDTH     : natural := 1;
+   constant C_EMPTY_WIDTH     : natural := 1;
+   
 begin
    -----------------------------------------------------------------------------
    -- Instantiate test harness, containing DUT and Executors
    -----------------------------------------------------------------------------
-   i_test_harness : entity work.th_avalon_st_vvc;
+   i_test_harness : entity work.th_avalon_st_vvc
+   generic map(
+         --CHANNEL_WIDTH  => C_CHANNEL_WIDTH,
+         DATA_WIDTH     => C_DATA_WIDTH,
+         --ERROR_WIDTH    => C_ERROR_WIDTH,
+         EMPTY_WIDTH    => C_EMPTY_WIDTH
+      );
 
 
 
@@ -50,9 +64,11 @@ begin
    -- PROCESS: p_main
    ------------------------------------------------
    p_main: process
-      variable v_data_array   : t_slv_array(0 to 9)(19 downto 0) := (others => (others => '0'));
-      variable v_empty        : std_logic_vector(1 downto 0) := 2x"0";
-      variable v_counter      : natural := 10;
+      variable v_data_array   : t_slv_array(0 to C_DATA_LENGTH-1)(C_DATA_WIDTH-1 downto 0) := (others => (others => '0'));
+      variable v_empty        : std_logic_vector(C_EMPTY_WIDTH-1 downto 0) := (others => '0');
+
+      variable v_num_test_loops  : natural := 0;
+      variable v_random_data     : natural := 0;
    begin
 
    -- Wait for UVVM to finish initialization
@@ -65,32 +81,54 @@ begin
    -- Enable log message
    disable_log_msg(ALL_MESSAGES);
    enable_log_msg(ID_LOG_HDR);
-   enable_log_msg(ID_SEQUENCER);
-   enable_log_msg(ID_UVVM_SEND_CMD);
+   --enable_log_msg(ID_DATA);
+   --enable_log_msg(ID_DEBUG);
+   --enable_log_msg(ID_SEQUENCER);
+   --enable_log_msg(ID_UVVM_SEND_CMD);
+
+   disable_log_msg(AVALON_ST_VVCT, 1, TX, ALL_MESSAGES);
+   disable_log_msg(AVALON_ST_VVCT, 1, RX, ALL_MESSAGES);
 
    -- Enable/disable Avalon-ST signals 
    --shared_avalon_st_vvc_config(TX, 1).bfm_config.use_channel   := false;
    --shared_avalon_st_vvc_config(TX, 1).bfm_config.use_error     := false;
    shared_avalon_st_vvc_config(TX, 1).bfm_config.use_empty     := true;
 
+   -- Percent of cycles the receive module should assert ready_o signal
+   --shared_avalon_st_vvc_config(RX, 1).bfm_config.ready_percentage := 50;
+
 
    log(ID_LOG_HDR, "Starting simulation of TB scaler vvc", C_SCOPE);
    log("Wait 10 clock period for reset to be turned off");
    wait for (10 * C_CLK_PERIOD); 
 
-   -- Write data to data_array
-   for i in v_data_array'range loop
-      -- TODO: write random data from OSVVM
-      v_data_array(i) := std_logic_vector(to_unsigned(v_counter, v_data_array(i)'length));
-      v_counter := v_counter + 10;
+   -- Number of times to run the test loop
+   v_num_test_loops := 10;
+
+   for i in 1 to v_num_test_loops loop
+      -- Create a random ready percentage for the recieve module
+      shared_avalon_st_vvc_config(RX, 1).bfm_config.ready_percentage := random(1,100);
+      log(ID_LOG_HDR, "Test loop number " & to_string(i) & " of " & to_string(v_num_test_loops) & " test loops. Using ready_percentage: " & to_string(shared_avalon_st_vvc_config(RX, 1).bfm_config.ready_percentage), C_SCOPE);
+
+      -- Margin
+      wait for 10*C_CLK_PERIOD; 
+
+      -- Write random data to data_array
+      for j in v_data_array'range loop
+         -- Generate random data
+         v_data_array(j) := random(C_DATA_WIDTH);
+      end loop;
+
+      -- Margin
+      wait for 10*C_CLK_PERIOD; 
+
+      -- Start send and receive VVC
+      avalon_st_receive(AVALON_ST_VVCT, 1, "Receiving data");
+      avalon_st_send(AVALON_ST_VVCT, 1, v_data_array, v_empty, "Sending v_data_array");
    end loop;
 
-
-   avalon_st_send(AVALON_ST_VVCT, 1, v_data_array, v_empty, "Sending v_data_array");
-   await_completion(AVALON_ST_VVCT, 1, TX, 200*C_CLK_PERIOD);
-
-
-
+   -- Wait for receive to complete
+   await_completion(AVALON_ST_VVCT, 1, RX, 2000*C_CLK_PERIOD);
 
 
    -----------------------------------------------------------------------------

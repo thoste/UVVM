@@ -27,10 +27,10 @@ library vip_avalon_st;
 -- Test harness entity
 entity th_avalon_st_vvc is
    generic (
-         --CHANNEL_WIDTH     : natural := 1;
-         DATA_WIDTH        : natural := 20;
-         --ERROR_WIDTH       : natural := 1;
-         EMPTY_WIDTH       : natural := 2
+         --CHANNEL_WIDTH     : natural;
+         DATA_WIDTH        : natural;
+         --ERROR_WIDTH       : natural;
+         EMPTY_WIDTH       : natural
       );
 end entity;
 
@@ -49,7 +49,7 @@ architecture struct of th_avalon_st_vvc is
    signal empty_i             : std_logic_vector(EMPTY_WIDTH - 1 downto 0);
    signal endofpacket_i       : std_logic := '0';
    signal startofpacket_i     : std_logic := '0';
-   
+   signal check_data          : std_logic_vector(DATA_WIDTH -1 downto 0);
    
    -- Source
    --signal channel_o           : std_logic_vector(CHANNEL_WIDTH - 1 downto 0);
@@ -91,6 +91,8 @@ begin
       avalon_st_sink_if.empty_i              => empty_i,
       avalon_st_sink_if.endofpacket_i        => endofpacket_i,
       avalon_st_sink_if.startofpacket_i      => startofpacket_i,
+      avalon_st_sink_if.check_data           => check_data,
+
       -- Source
       --avalon_st_source_if.channel_o          => channel_o,
       avalon_st_source_if.data_o             => data_o,
@@ -101,6 +103,13 @@ begin
       avalon_st_source_if.endofpacket_o      => endofpacket_o,
       avalon_st_source_if.startofpacket_o    => startofpacket_o
    );
+
+   data_i <= data_o;
+   ready_i <= ready_o;
+   valid_i <= valid_o;
+   empty_i <= empty_o;
+   startofpacket_i <= startofpacket_o;
+   endofpacket_i <= endofpacket_o;
 
 
    -----------------------------------------------------------------------------
@@ -116,18 +125,6 @@ begin
    begin
       clk_i <= '0', '1' after C_CLK_PERIOD / 2;
       wait for C_CLK_PERIOD;
-   end process;
-
-   p_ready: process
-   begin
-      ready_i <= '0';
-      for i in 0 to 5 loop
-         wait until rising_edge(clk_i);
-      end loop;
-      ready_i <= '1';
-      for i in 0 to 5 loop
-         wait until rising_edge(clk_i);
-      end loop;
    end process;
 
 end struct;

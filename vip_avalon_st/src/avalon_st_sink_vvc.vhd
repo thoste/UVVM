@@ -176,7 +176,7 @@ begin
 --========================================================================================================================
   cmd_executor : process
     variable v_cmd                                    : t_vvc_cmd_record;
-    -- variable v_read_data                              : t_vvc_result; -- See vvc_cmd_pkg
+    variable v_result                                 : t_vvc_result; -- See vvc_cmd_pkg
     variable v_timestamp_start_of_current_bfm_access  : time := 0 ns;
     variable v_timestamp_start_of_last_bfm_access     : time := 0 ns;
     variable v_timestamp_end_of_last_bfm_access       : time := 0 ns;
@@ -229,43 +229,32 @@ begin
         -- VVC dedicated operations
         --===================================
 
-        --<USER_INPUT>: Insert BFM procedure calls here
-        -- Example:
-        --   when WRITE =>
-        --     v_normalised_addr := normalize_and_check(v_cmd.addr, v_normalised_addr, ALLOW_WIDER_NARROWER, "addr", "shared_vvc_cmd.addr", "avalon_st_write() called with to wide address. " & v_cmd.msg);
-        --     v_normalised_data := normalize_and_check(v_cmd.data, v_normalised_data, ALLOW_WIDER_NARROWER, "data", "shared_vvc_cmd.data", "avalon_st_write() called with to wide data. " & v_cmd.msg);
-        --  -- Add info to the transaction_for_waveview_struct if needed
-        --     transaction_info.data(GC_DATA_WIDTH - 1 downto 0) := v_normalised_data;
-        --     transaction_info.addr(GC_ADDR_WIDTH - 1 downto 0) := v_normalised_addr;
-        --  -- Call the corresponding procedure in the BFM package.
-        --     avalon_st_write(addr_value    => v_normalised_addr,
-        --               data_value    => v_normalised_data,
-        --               msg           => format_msg(v_cmd),
-        --               clk           => clk,
-        --               avalon_st_if        => avalon_st_vvc_if,
-        --               scope         => C_SCOPE,
-        --               msg_id_panel  => vvc_config.msg_id_panel,
-        --               config        => vvc_config.bfm_config);
+        when RECEIVE =>
+          avalon_st_receive(
+            data_array          => v_result.data_array,
+            data_width          => GC_DATA_WIDTH,
+            empty               => v_result.empty,
+            empty_width         => GC_EMPTY_WIDTH,
+            msg                 => format_msg(v_cmd),
+            clk                 => clk,
+            -- Using the non-record version to avoid fatal error in Questa: (SIGSEGV) Bad handle or reference
+            data_i              => avalon_st_sink_if.data_i,
+            ready_o             => avalon_st_sink_if.ready_o,  
+            valid_i             => avalon_st_sink_if.valid_i,
+            empty_i             => avalon_st_sink_if.empty_i,
+            endofpacket_i       => avalon_st_sink_if.endofpacket_i,
+            startofpacket_i     => avalon_st_sink_if.startofpacket_i,
+            check_data          => avalon_st_sink_if.check_data,
+            scope               => C_SCOPE,
+            msg_id_panel        => vvc_config.msg_id_panel,
+            config              => vvc_config.bfm_config
+          );
 
-        --  -- If the result from the BFM call is to be stored, e.g. in a read call, use the additional procedure illustrated in this read example
-        --   when READ =>
-        --     v_normalised_addr := normalize_and_check(v_cmd.addr, v_normalised_addr, ALLOW_WIDER_NARROWER, "addr", "shared_vvc_cmd.addr", "avalon_st_write() called with to wide address. " & v_cmd.msg);
-        --  -- Add info to the transaction_for_waveview_struct if needed
-        --     transaction_info.addr(GC_ADDR_WIDTH - 1 downto 0) := v_normalised_addr;
-        --  -- Call the corresponding procedure in the BFM package.
-        --     avalon_st_read(addr_value    => v_normalised_addr,
-        --              data_value    => v_read_data,
-        --              msg           => format_msg(v_cmd),
-        --              clk           => clk,
-        --              avalon_st_if        => avalon_st_vvc_if,
-        --              scope         => C_SCOPE,
-        --              msg_id_panel  => vvc_config.msg_id_panel,
-        --              config        => vvc_config.bfm_config);
-        --  -- Store the result
-        --     work.td_vvc_entity_support_pkg.store_result(result_queue  => result_queue,
-        --                                       cmd_idx       => v_cmd.cmd_idx,
-        --                                       result          => v_read_data);
-
+          work.td_vvc_entity_support_pkg.store_result(
+            result_queue => result_queue,
+            cmd_idx      => v_cmd.cmd_idx,
+            result       => v_result
+          );
 
         -- UVVM common operations
         --===================================

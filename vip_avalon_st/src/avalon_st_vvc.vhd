@@ -76,7 +76,8 @@ begin
          avalon_st_sink_if.valid_i          => avalon_st_sink_if.valid_i,
          avalon_st_sink_if.empty_i          => avalon_st_sink_if.empty_i,
          avalon_st_sink_if.endofpacket_i    => avalon_st_sink_if.endofpacket_i,
-         avalon_st_sink_if.startofpacket_i  => avalon_st_sink_if.startofpacket_i
+         avalon_st_sink_if.startofpacket_i  => avalon_st_sink_if.startofpacket_i,
+         avalon_st_sink_if.check_data        => avalon_st_sink_if.check_data
       );
 
 

@@ -25,7 +25,7 @@ package adaptations_pkg is
   constant C_ALERT_FILE_NAME : string := "_Alert.txt";
   constant C_LOG_FILE_NAME   : string := "_Log.txt";
 
-  constant C_SHOW_UVVM_UTILITY_LIBRARY_INFO         : boolean := true;  -- Set this to false when you no longer need the initial info
+  constant C_SHOW_UVVM_UTILITY_LIBRARY_INFO         : boolean := false;  -- Set this to false when you no longer need the initial info
   constant C_SHOW_UVVM_UTILITY_LIBRARY_RELEASE_INFO : boolean := true;  -- Set this to false when you no longer need the release info
 
   -------------------------------------------------------------------------------
@@ -41,7 +41,7 @@ package adaptations_pkg is
   constant C_LOG_TIME_BASE      : time    := ns; -- Unit in which time is shown in log (ns | ps)
   constant C_LOG_TIME_DECIMALS  : natural := 1; -- Decimals to show for given C_LOG_TIME_BASE
   constant C_LOG_SCOPE_WIDTH    : natural := 30;
-  constant C_LOG_LINE_WIDTH     : natural := 175;
+  constant C_LOG_LINE_WIDTH     : natural := 300;
   constant C_LOG_INFO_WIDTH     : natural := C_LOG_LINE_WIDTH - C_LOG_PREFIX_WIDTH;
 
   constant C_USE_BACKSLASH_N_AS_LF : boolean := true; -- If true interprets '\n' as Line feed
@@ -141,6 +141,8 @@ package adaptations_pkg is
     -- SB package
     ID_DATA,
     ID_CTRL,
+    -- Debug
+    ID_DEBUG,
     -- Special purpose - Not really IDs
     ALL_MESSAGES          -- Applies to ALL message ID apart from ID_NEVER
     );

@@ -53,7 +53,7 @@ package vvc_cmd_pkg is
   -- Create constants for the maximum sizes to use in this VVC.
   --constant C_VVC_CMD_CHANNEL_MAX_WIDTH        : natural := 128;   -- From Avalon Interface Specifications, chapter 5.2
   constant C_VVC_CMD_DATA_MAX_WIDTH           : natural := 4096;  -- From Avalon Interface Specifications, chapter 5.2
-  constant C_VVC_CMD_DATA_MAX_LENGTH          : natural := 1024;  -- Max number of entries in array, (max data entries sent between startofpacket - endofpacket)
+  constant C_VVC_CMD_DATA_MAX_LENGTH          : natural := 8192;  -- Max number of entries in array, (max data entries sent between startofpacket - endofpacket)
   --constant C_VVC_CMD_ERROR_MAX_WIDTH          : natural := 256;   -- From Avalon Interface Specifications, chapter 5.2
   constant C_VVC_CMD_EMPTY_MAX_WIDTH          : natural := 5;     -- From Avalon Interface Specifications, chapter 5.2
   constant C_VVC_CMD_STRING_MAX_LENGTH        : natural := 300;
@@ -121,7 +121,6 @@ package vvc_cmd_pkg is
 
   type t_vvc_result is record 
     data_array    : t_slv_array(0 to C_VVC_CMD_DATA_MAX_LENGTH-1)(C_VVC_CMD_DATA_MAX_WIDTH-1 downto 0);
-    data_length   : natural;
     empty         : std_logic_vector(C_VVC_CMD_EMPTY_MAX_WIDTH-1 downto 0);
   end record;
 
@@ -166,7 +165,7 @@ package body vvc_cmd_pkg is
     result : t_vvc_result 
   ) return string is 
   begin
-    return to_string(result.data_length) & " Bytes";
+    return to_string(result.data_array'high) & " Bytes";
   end;
 
 end package body vvc_cmd_pkg;
