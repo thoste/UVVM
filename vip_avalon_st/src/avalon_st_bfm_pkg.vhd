@@ -50,7 +50,7 @@ package avalon_st_bfm_pkg is
       endofpacket_i     : std_logic;
       startofpacket_i   : std_logic;
       -- Debug signal
-      check_data        : std_logic_vector;
+      --check_data        : std_logic_vector;
    end record;
 
    -- Configuration record to be assigned in the test harness.
@@ -153,7 +153,7 @@ package avalon_st_bfm_pkg is
       signal empty_i                : in std_logic_vector;
       signal endofpacket_i          : in std_logic;
       signal startofpacket_i        : in std_logic;
-      signal check_data             : out std_logic_vector;
+      --signal check_data             : out std_logic_vector;
       constant scope                : in     string                  := C_SCOPE;
       constant msg_id_panel         : in     t_msg_id_panel          := shared_msg_id_panel;
       constant config               : in     t_avalon_st_bfm_config  := C_AVALON_ST_BFM_CONFIG_DEFAULT
@@ -209,8 +209,8 @@ package body avalon_st_bfm_pkg is
          --channel_i(channel_width - 1 downto 0),
          data_i(data_width - 1 downto 0),
          --error_i(error_width -1 downto 0),
-         empty_i(empty_width -1 downto 0),
-         check_data(data_width -1 downto 0)
+         empty_i(empty_width -1 downto 0)
+         --check_data(data_width -1 downto 0)
       );
    begin
       --result.channel_i        := (result.channel_i'range    => 'Z');
@@ -335,7 +335,7 @@ package body avalon_st_bfm_pkg is
       signal empty_i                : in std_logic_vector;
       signal endofpacket_i          : in std_logic;
       signal startofpacket_i        : in std_logic;
-      signal check_data             : out std_logic_vector;
+      --signal check_data             : out std_logic_vector;
       constant scope                : in     string                  := C_SCOPE;
       constant msg_id_panel         : in     t_msg_id_panel          := shared_msg_id_panel;
       constant config               : in     t_avalon_st_bfm_config  := C_AVALON_ST_BFM_CONFIG_DEFAULT

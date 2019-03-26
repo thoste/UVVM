@@ -49,7 +49,7 @@ architecture struct of th_avalon_st_vvc is
    signal empty_i             : std_logic_vector(EMPTY_WIDTH - 1 downto 0);
    signal endofpacket_i       : std_logic := '0';
    signal startofpacket_i     : std_logic := '0';
-   signal check_data          : std_logic_vector(DATA_WIDTH -1 downto 0);
+   --signal check_data          : std_logic_vector(DATA_WIDTH -1 downto 0);
    
    -- Source
    --signal channel_o           : std_logic_vector(CHANNEL_WIDTH - 1 downto 0);
@@ -91,7 +91,7 @@ begin
       avalon_st_sink_if.empty_i              => empty_i,
       avalon_st_sink_if.endofpacket_i        => endofpacket_i,
       avalon_st_sink_if.startofpacket_i      => startofpacket_i,
-      avalon_st_sink_if.check_data           => check_data,
+      --avalon_st_sink_if.check_data           => check_data,
 
       -- Source
       --avalon_st_source_if.channel_o          => channel_o,

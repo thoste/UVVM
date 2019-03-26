@@ -34,7 +34,7 @@ if {[catch {eval "vsim -version"} message] == 0} {
     abort all
 }
 
-vsim  avalon_st.tb_avalon_st_vvc
+vsim avalon_st.tb_avalon_st_vvc
 
 if {[batch_mode] == 0} {
 	if {$simulator == "modelsim"} {

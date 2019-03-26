@@ -237,14 +237,14 @@ begin
             empty_width         => GC_EMPTY_WIDTH,
             msg                 => format_msg(v_cmd),
             clk                 => clk,
-            -- Using the non-record version to avoid fatal error in Questa: (SIGSEGV) Bad handle or reference
+            -- Using the non-record version to avoid fatal error: (SIGSEGV) Bad handle or reference
             data_i              => avalon_st_sink_if.data_i,
             ready_o             => avalon_st_sink_if.ready_o,  
             valid_i             => avalon_st_sink_if.valid_i,
             empty_i             => avalon_st_sink_if.empty_i,
             endofpacket_i       => avalon_st_sink_if.endofpacket_i,
             startofpacket_i     => avalon_st_sink_if.startofpacket_i,
-            check_data          => avalon_st_sink_if.check_data,
+            --check_data          => avalon_st_sink_if.check_data,
             scope               => C_SCOPE,
             msg_id_panel        => vvc_config.msg_id_panel,
             config              => vvc_config.bfm_config

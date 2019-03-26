@@ -124,7 +124,7 @@ begin
 
       -- Start send and receive VVC
       avalon_st_receive(AVALON_ST_VVCT, 1, "Receiving data");
-      avalon_st_send(AVALON_ST_VVCT, 1, v_data_array, v_empty, "Sending v_data_array");
+      --avalon_st_send(AVALON_ST_VVCT, 1, v_data_array, v_empty, "Sending v_data_array");
    end loop;
 
    -- Wait for receive to complete
