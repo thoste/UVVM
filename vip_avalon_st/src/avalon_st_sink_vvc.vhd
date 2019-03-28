@@ -182,8 +182,6 @@ begin
     variable v_timestamp_end_of_last_bfm_access       : time := 0 ns;
     variable v_command_is_bfm_access                  : boolean := false;
     variable v_prev_command_was_bfm_access            : boolean := false;
-    -- variable v_normalised_addr    : unsigned(GC_ADDR_WIDTH-1 downto 0) := (others => '0');
-    -- variable v_normalised_data    : std_logic_vector(GC_DATA_WIDTH-1 downto 0) := (others => '0');
   begin
 
     -- 0. Initialize the process prior to first command
@@ -233,9 +231,10 @@ begin
           avalon_st_receive(
             data_array          => v_result.data_array,
             data_width          => GC_DATA_WIDTH,
+            data_length         => v_result.data_length,
             empty               => v_result.empty,
             empty_width         => GC_EMPTY_WIDTH,
-            msg                 => format_msg(v_cmd),
+            msg                 => format_msg(v_cmd), -- fatal error: (SIGSEGV) here is because of too small value of C_VVC_CMD_STRING_MAX_LENGTH in vvc_cmd_pkg.vhd
             clk                 => clk,
             -- Using the non-record version to avoid fatal error: (SIGSEGV) Bad handle or reference
             data_i              => avalon_st_sink_if.data_i,
@@ -244,7 +243,6 @@ begin
             empty_i             => avalon_st_sink_if.empty_i,
             endofpacket_i       => avalon_st_sink_if.endofpacket_i,
             startofpacket_i     => avalon_st_sink_if.startofpacket_i,
-            --check_data          => avalon_st_sink_if.check_data,
             scope               => C_SCOPE,
             msg_id_panel        => vvc_config.msg_id_panel,
             config              => vvc_config.bfm_config
@@ -254,6 +252,27 @@ begin
             result_queue => result_queue,
             cmd_idx      => v_cmd.cmd_idx,
             result       => v_result
+          );
+
+        when EXPECT =>
+          avalon_st_expect(
+            exp_data_array    => v_cmd.data_array(0 to v_cmd.data_array_length-1),
+            exp_data_width    => GC_DATA_WIDTH,
+            exp_empty         => v_cmd.empty,
+            exp_empty_width   => GC_EMPTY_WIDTH,
+            msg               => format_msg(v_cmd),
+            clk               => clk,
+             -- Using the non-record version to avoid fatal error: (SIGSEGV) Bad handle or reference
+            data_i            => avalon_st_sink_if.data_i,
+            ready_o           => avalon_st_sink_if.ready_o,  
+            valid_i           => avalon_st_sink_if.valid_i,
+            empty_i           => avalon_st_sink_if.empty_i,
+            endofpacket_i     => avalon_st_sink_if.endofpacket_i,
+            startofpacket_i   => avalon_st_sink_if.startofpacket_i,
+            alert_level       => v_cmd.alert_level,
+            scope             => C_SCOPE,
+            msg_id_panel      => vvc_config.msg_id_panel,
+            config            => vvc_config.bfm_config
           );
 
         -- UVVM common operations

@@ -125,7 +125,7 @@ package vvc_methods_pkg is
   --========================================================================================================================
 
 
-  procedure avalon_st_send(
+  procedure avalon_st_send (
     signal VVCT                 : inout t_vvc_target_record;
     constant vvc_instance_idx   : in    integer;
     constant data_array         : in    t_slv_array;
@@ -133,12 +133,20 @@ package vvc_methods_pkg is
     constant msg                : in    string
   );
 
-  procedure avalon_st_receive(
+  procedure avalon_st_receive (
     signal VVCT                 : inout t_vvc_target_record;
     constant vvc_instance_idx   : in    integer;
     constant msg                : in    string
   );
 
+  procedure avalon_st_expect (
+    signal VVCT                 : inout t_vvc_target_record;
+    constant vvc_instance_idx   : in    integer;
+    constant data_array         : in    t_slv_array;
+    constant empty              : in    std_logic_vector;
+    constant msg                : in    string;
+    constant alert_level        : in    t_alert_level := error
+  );
 end package vvc_methods_pkg;
 
 
@@ -149,7 +157,7 @@ package body vvc_methods_pkg is
   -- Methods dedicated to this VVC
   --========================================================================================================================
 
-  procedure avalon_st_send(
+  procedure avalon_st_send (
     signal VVCT                 : inout t_vvc_target_record;
     constant vvc_instance_idx   : in    integer;
     constant data_array         : in    t_slv_array;
@@ -190,6 +198,34 @@ package body vvc_methods_pkg is
     -- locking semaphore in set_general_target_and_command_fields to gain exclusive right to VVCT and shared_vvc_cmd
     -- semaphore gets unlocked in await_cmd_from_sequencer of the targeted VVC
     set_general_target_and_command_fields(VVCT, vvc_instance_idx, RX, proc_call, msg, QUEUED, RECEIVE);
+
+    -- Send command record
+    send_command_to_vvc(VVCT);
+  end procedure;
+
+  procedure avalon_st_expect (
+    signal VVCT                 : inout t_vvc_target_record;
+    constant vvc_instance_idx   : in    integer;
+    constant data_array         : in    t_slv_array;
+    constant empty              : in    std_logic_vector;
+    constant msg                : in    string;
+    constant alert_level        : in    t_alert_level := error
+  ) is
+    constant proc_name : string := get_procedure_name_from_instance_name(vvc_instance_idx'instance_name);
+    constant proc_call : string := proc_name & "()";
+  begin
+    -- Create command by setting common global 'VVCT' signal record and dedicated VVC 'shared_vvc_cmd' record
+    -- locking semaphore in set_general_target_and_command_fields to gain exclusive right to VVCT and shared_vvc_cmd
+    -- semaphore gets unlocked in await_cmd_from_sequencer of the targeted VVC
+    set_general_target_and_command_fields(VVCT, vvc_instance_idx, RX, proc_call, msg, QUEUED, EXPECT);
+
+    -- Generate cmd record
+    for i in data_array'range loop
+      shared_vvc_cmd.data_array(i)(data_array(i)'range) := data_array(i);
+    end loop;
+    shared_vvc_cmd.data_array_length                := data_array'length;
+    shared_vvc_cmd.empty(empty'length-1 downto 0)   := empty;
+    shared_vvc_cmd.alert_level                      := alert_level;
 
     -- Send command record
     send_command_to_vvc(VVCT);

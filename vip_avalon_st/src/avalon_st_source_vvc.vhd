@@ -232,16 +232,22 @@ begin
       when SEND =>
         -- Call the corresponding procedure in the BFM package.
         avalon_st_send(
-          data_array            => v_cmd.data_array(0 to v_cmd.data_array_length-1),
-          data_width            => GC_DATA_WIDTH,
-          empty                 => v_cmd.empty,
-          empty_width           => GC_EMPTY_WIDTH,
-          msg                   => format_msg(v_cmd),
-          clk                   => clk,
-          avalon_st_source_if   => avalon_st_source_if,
-          scope                 => C_SCOPE,
-          msg_id_panel          => vvc_config.msg_id_panel,
-          config                => vvc_config.bfm_config
+          data_array        => v_cmd.data_array(0 to v_cmd.data_array_length-1),
+          data_width        => GC_DATA_WIDTH,
+          empty             => v_cmd.empty,
+          empty_width       => GC_EMPTY_WIDTH,
+          msg               => format_msg(v_cmd),
+          clk               => clk,
+          ---- Using the non-record version to avoid fatal error: (SIGSEGV) Bad handle or reference
+          data_o            => avalon_st_source_if.data_o,
+          ready_i           => avalon_st_source_if.ready_i,  
+          valid_o           => avalon_st_source_if.valid_o,
+          empty_o           => avalon_st_source_if.empty_o,
+          endofpacket_o     => avalon_st_source_if.endofpacket_o,
+          startofpacket_o   => avalon_st_source_if.startofpacket_o,
+          scope             => C_SCOPE,
+          msg_id_panel      => vvc_config.msg_id_panel,
+          config            => vvc_config.bfm_config
         );
 
 
