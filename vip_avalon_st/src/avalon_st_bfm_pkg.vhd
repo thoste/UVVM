@@ -515,6 +515,9 @@ package body avalon_st_bfm_pkg is
             v_ready_low_done := true;
          end if;
 
+         -- Assert signals on rising edge
+         wait until rising_edge(clk);
+
          if (random(1,100) <= config.ready_percentage) then
             -- Signal that the module is ready to recieve
             avalon_st_sink_if.ready_o <= '1';
@@ -539,17 +542,22 @@ package body avalon_st_bfm_pkg is
                -- Empty signal received together with last data
                empty(empty_width-1 downto 0) := avalon_st_sink_if.empty_i;
                log(ID_PACKET_DATA, proc_call & " => RX empty signal: " & to_string(empty(empty_width-1 downto 0), HEX, AS_IS, INCL_RADIX), scope, msg_id_panel);
+               
+               -- DANGEROUS!!!! 
                -- Done receiving data
                v_done := true;
                -- Signal that module is not ready to receive any more data
-               avalon_st_sink_if.ready_o <= '0';
+               avalon_st_sink_if.ready_o <= '0'; 
+               -- TODO:
+               -- May lose data if new data arrives on next clock cycle
+               -- This happens since endofpacket_i and data_i is sampled on current clk, but ready_o is set low on next clk cycle
+               -- Avalon-ST with ready latency of 1 (Avalon-ST video) implies that a module should be able to recieve data one clk cycle after setting ready low
             else
                -- Increase counter for data_array for next data to be received
                v_byte := v_byte + 1;
             end if;
          end if;
 
-         wait until rising_edge(clk);
       end loop;
 
       data_length := v_byte;
