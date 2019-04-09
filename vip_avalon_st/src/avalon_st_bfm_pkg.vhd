@@ -359,9 +359,6 @@ package body avalon_st_bfm_pkg is
 
          -- Wait for ready signal
          while (avalon_st_source_if.ready_i = '0') loop
-            -- No valid data on data_o
-            avalon_st_source_if.valid_o <= '0';
-
             -- Wait for next clock cycle, then check for ready
             wait until rising_edge(clk);
          end loop;
@@ -398,9 +395,17 @@ package body avalon_st_bfm_pkg is
             end if;
             -- Send endofpacket
             log(ID_PACKET_DATA, proc_call & " => Sending endofpacket", scope, msg_id_panel);
-            avalon_st_source_if.endofpacket_o <= '1', '0' after config.clock_period;
-            avalon_st_source_if.valid_o <= '1', '0' after config.clock_period;
+            --avalon_st_source_if.endofpacket_o <= '1', '0' after config.clock_period;
+            --avalon_st_source_if.valid_o <= '1', '0' after config.clock_period;
+            avalon_st_source_if.endofpacket_o <= '1';
+            avalon_st_source_if.valid_o <= '1';
          end if;
+         wait until rising_edge(clk);
+      end loop;
+
+      -- Wait until module is done recieving
+      while (avalon_st_source_if.ready_i = '0') loop
+         -- Wait for next clock cycle, then check for ready
          wait until rising_edge(clk);
       end loop;
 
@@ -532,7 +537,7 @@ package body avalon_st_bfm_pkg is
          end if;
          
          -- Sample data packet on each valid signal until endofpacket is recieved
-         if v_received_sop and (avalon_st_sink_if.valid_i = '1') then
+         if v_received_sop and (avalon_st_sink_if.valid_i = '1') and avalon_st_sink_if.ready_o = '1' then
             -- TODO: add last ready = 1 check, else assert error
             data_array(v_byte)(data_width-1 downto 0) := avalon_st_sink_if.data_i;
             log(ID_PACKET_DATA, proc_call & " => RX: " & to_string(data_array(v_byte)(data_width-1 downto 0), HEX, AS_IS, INCL_RADIX) & ", data_array entry# " & to_string(v_byte) & ". " & add_msg_delimiter(msg), scope, msg_id_panel);
