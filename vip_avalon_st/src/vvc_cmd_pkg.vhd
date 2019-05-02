@@ -53,7 +53,7 @@ package vvc_cmd_pkg is
   -- Create constants for the maximum sizes to use in this VVC.
   --constant C_VVC_CMD_CHANNEL_MAX_WIDTH        : natural := 128;   -- From Avalon Interface Specifications, chapter 5.2
   constant C_VVC_CMD_DATA_MAX_WIDTH           : natural := 4096;  -- From Avalon Interface Specifications, chapter 5.2
-  constant C_VVC_CMD_DATA_MAX_LENGTH          : natural := 8192;  -- Max number of entries in array, (max data entries sent between startofpacket - endofpacket)
+  constant C_VVC_CMD_DATA_MAX_LENGTH          : natural := 32768;  -- Max number of entries in array, (max data entries sent between startofpacket - endofpacket)
   --constant C_VVC_CMD_ERROR_MAX_WIDTH          : natural := 256;   -- From Avalon Interface Specifications, chapter 5.2
   constant C_VVC_CMD_EMPTY_MAX_WIDTH          : natural := 5;     -- From Avalon Interface Specifications, chapter 5.2
   constant C_VVC_CMD_STRING_MAX_LENGTH        : natural := 1000;
